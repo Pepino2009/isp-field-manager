@@ -36,18 +36,21 @@ class HomeViewModel extends ChangeNotifier {
         String? token = await _secureStorage.read(key: 'auth_token');
 
         final response = await http.get(
-          Uri.parse('https://oquetemnomeuscosmetico.com.br/api/chamados'),
+          Uri.parse('https://oquetemnomeucosmetico.com.br/api/chamados'),
           headers: {
             'Content-Type': 'application/json',
             if (token != null) 'Authorization': 'Bearer $token',
           },
         ).timeout(const Duration(seconds: 10));
+        debugPrint('STATUS: ${response.statusCode}');
+        debugPrint('RESPOSTA: ${response.body}');
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           var itens = data['dados'] ?? data;
           if (itens is List) {
             for (var jsonItem in itens) {
+            
               try {
                 final mapSeguro = {
                   'id': jsonItem['id'],
@@ -65,7 +68,11 @@ class HomeViewModel extends ChangeNotifier {
                 print('Erro ao mapear item: $e');
               }
             }
-          }
+            if (listaTemporaria.isNotEmpty) {
+             await DatabaseHelper.instance
+             .inserirChamadosEmLote(listaTemporaria);
+           }
+         }
         }
       } catch (e) {
         print('Erro na API: $e');

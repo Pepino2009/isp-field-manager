@@ -72,14 +72,18 @@ class DatabaseHelper {
   }
 
   Future<List<ChamadoModel>> listarChamadosAbertos() async {
-    final db = await instance.database;
-    final result = await db.query(
-      'chamados',
-      where: 'status = ?',
-      whereArgs: ['aberto'],
-    );
-    return result.map((json) => ChamadoModel.fromMap(json)).toList();
-  }
+  final db = await instance.database;
+
+  final result = await db.query(
+    'chamados',
+    where: "LOWER(TRIM(status)) = ?",
+    whereArgs: ['aberto'],
+  );
+
+  return result
+      .map((json) => ChamadoModel.fromMap(json))
+      .toList();
+}
 
   Future<void> atualizarStatusChamado(int id, String novoStatus) async {
     final db = await instance.database;
